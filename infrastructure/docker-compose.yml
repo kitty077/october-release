@@ -1,0 +1,66 @@
+version: '3.9'
+services:
+  web:
+    build:
+      context: ..
+    container_name: app
+    image: app
+    ports:
+      - '8080:8080'
+    expose:
+      - '8080'
+    environment:
+      JDBCDRIVER: 'com.mysql.cj.jdbc.Driver'
+      JDBCPROVIDER: 'mysql'
+      JDBCHOST: db
+      JDBCPORT: '3306'
+      SCHEMADB: 'MOBILES'
+      JDBCUSER: 'admin_db'
+      JDBCPASS: 'password'
+      USESSL: 'false'
+    volumes:
+      - /etc/timezone:/etc/timezone:ro
+      - /etc/localtime:/etc/localtime:ro
+    depends_on:
+      - db
+
+  adminer:
+    container_name: adminer
+    image: adminer
+    restart: always
+    ports:
+      - '8088:8080'
+    depends_on:
+      - db
+
+  db:
+    container_name: db
+    image: mysql:8.0.21
+    restart: always
+    ports:
+    - '3307:3306'
+    expose:
+      - '3306'
+    environment:
+      MYSQL_DATABASE: 'MOBILES'
+      MYSQL_USER: 'admin_db'
+      MYSQL_PASSWORD: 'password'
+      MYSQL_ROOT_PASSWORD: 'PASSWORD'
+      MYSQL_ROOT_HOST: '%'
+    volumes:
+      - ../db:/tmp/database
+      - ../db/custom.cnf:/etc/mysql/conf.d/custom.cnf
+      - /etc/timezone:/etc/timezone:ro
+      - /etc/localtime:/etc/localtime:ro
+    command: --default-authentication-plugin=mysql_native_password
+    healthcheck:
+      test: [ "CMD", "mysqladmin" ,"ping", "-h", "localhost" ]
+      timeout: 20s
+      retries: 10
+
+  hello-world:
+    container_name: hello-world
+    image: hello-world
+    depends_on:
+      web:
+        condition: service_healthy

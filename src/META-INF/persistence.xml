@@ -1,0 +1,19 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<persistence xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" version="2.1"
+             xmlns="http://xmlns.jcp.org/xml/ns/persistence"
+             xsi:schemaLocation="http://xmlns.jcp.org/xml/ns/persistence
+             http://xmlns.jcp.org/xml/ns/persistence/persistence_2_1.xsd">
+    <!--    https://stackoverflow.com/a/3895119/9586230 -->
+    <!--    https://stackoverflow.com/a/14841100/9586230 -->
+    <!-- https://stackoverflow.com/a/12488416/9586230 -->
+    <persistence-unit name="Task" transaction-type="JTA">
+        <provider>org.apache.openjpa.persistence.PersistenceProviderImpl</provider>
+        <jta-data-source>jdbc/MySQLDataSource2</jta-data-source>
+        <!--        <class>com.kirilo.task.entities.Task</class>-->
+        <properties>
+            <!--            auto create table with sequence-->
+            <property name="openjpa.jdbc.SynchronizeMappings" value="buildSchema(ForeignKeys=true)"/>
+        </properties>
+    </persistence-unit>
+
+</persistence>

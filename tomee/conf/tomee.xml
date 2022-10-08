@@ -1,0 +1,28 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<tomee>
+
+<!--    <Resource id="MySQLDataSource" type="DataSource">
+        userName = admin_db
+        password = password
+        maxActive = 100
+        maxIdle = 30
+        maxWait = 10000
+        jdbcDriver = com.mysql.cj.jdbc.Driver
+        jdbcUrl = jdbc:mysql://db:3306/awesome_project?useSSL=false
+        JtaManaged true
+    </Resource>-->
+
+    <Resource id="MySQLDataSource" type="javax.sql.DataSource">
+        userName = ${JDBCUSER}
+        password = ${JDBCPASS}
+        maxActive = 100
+        maxIdle = 30
+        maxWait = 10000
+        jdbcDriver = ${JDBCDRIVER}
+<!--        jdbcUrl = jdbc:mysql://db:3306/awesome_project?useUnicode=yes&amp;characterEncoding=UTF-8-->
+<!--        jdbcUrl = jdbc:mysql://db:3306/awesome_project?autoReconnect=true&amp;zeroDateTimeBehavior=convertToNull&amp;emulateLocators=true&amp;characterEncoding=UTF-8&amp;useSSL=false-->
+        jdbcUrl = jdbc:${JDBCPROVIDER}://${JDBCHOST}:${JDBCPORT}/${SCHEMADB}?useSSL=${USESSL}
+        JtaManaged true
+    </Resource>
+
+</tomee>

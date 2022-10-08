@@ -1,0 +1,171 @@
+<project xmlns="http://maven.apache.org/POM/4.0.0"
+         xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+         xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+    <modelVersion>4.0.0</modelVersion>
+
+    <groupId>Flipkart</groupId>
+    <artifactId>MOBILES</artifactId>
+    <version>1.0-SNAPSHOT</version>
+    <packaging>war</packaging>
+
+    <!--    https://maven.apache.org/plugins/maven-war-plugin/plugin-info.html -->
+
+    <build>
+        <finalName>MOBILES</finalName>
+        <sourceDirectory>${src.dir}</sourceDirectory>
+
+        <!--        https://maven.apache.org/guides/mini/guide-creating-archetypes.html-->
+        <!--        https://maven.apache.org/plugins/maven-war-plugin/examples/adding-filtering-webresources.html -->
+        <pluginManagement>
+            <plugins>
+
+                <!--            http://tutorials.jenkov.com/maven/java-compiler.html -->
+                <!--            https://www.baeldung.com/maven-java-version#java9 -->
+                <plugin>
+                    <groupId>org.apache.maven.plugins</groupId>
+                    <artifactId>maven-compiler-plugin</artifactId>
+                    <version>3.8.1</version>
+                    <configuration>
+                        <!--                        <release>${java.version}</release>-->
+                        <!--                        <compilerArgs>&#45;&#45;enable-preview</compilerArgs>-->
+                        <source>${java.version}</source>
+                        <target>${java.version}</target>
+                    </configuration>
+                </plugin>
+
+                <plugin>
+                    <groupId>org.apache.maven.plugins</groupId>
+                    <artifactId>maven-war-plugin</artifactId>
+                    <version>3.3.1</version>
+                    <configuration>
+                        <!--                        <webappDirectory>${project.basedir}/target</webappDirectory>-->
+                        <!--                        <filteringDeploymentDescriptors>true</filteringDeploymentDescriptors>-->
+                        <!-- Optionally specify where the web.xml file comes from -->
+                        <webXml>${project.basedir}/web/WEB-INF/web.xml</webXml>
+                        <!-- Optionally specify extra resources to include -->
+                        <webResources>
+
+                            <resource>
+                                <directory>${project.basedir}/web/WEB-INF</directory>
+                                <filtering>true</filtering>
+
+                                <targetPath>WEB-INF</targetPath>
+                                <includes>
+                                    <include>**/*</include>
+                                </includes>
+                            </resource>
+                            <!-- https://stackoverflow.com/a/36484906/9586230 -->
+                            <resource>
+                                <directory>${src.dir}/META-INF</directory>
+                                <filtering>true</filtering>
+
+                                <targetPath>WEB-INF/classes/META-INF</targetPath>
+                                <includes>
+                                    <include>**/persistence.xml</include>
+                                </includes>
+                            </resource>
+
+                            <resource>
+                                <directory>${project.basedir}/db</directory>
+                                <filtering>true</filtering>
+
+                                <targetPath>WEB-INF/db</targetPath>
+                                <includes>
+                                    <include>**/*.sql</include>
+                                </includes>
+                            </resource>
+
+                        </webResources>
+                        <warSourceDirectory>web</warSourceDirectory>
+                        <archiveClasses>false</archiveClasses>
+                    </configuration>
+                </plugin>
+
+                <plugin>
+                    <groupId>org.apache.tomee.maven</groupId>
+                    <artifactId>tomee-maven-plugin</artifactId>
+                    <version>${tomee.version}</version>
+                    <configuration>
+                        <tomeeClassifier>${tomee.flavour}</tomeeClassifier>
+                        <args>-Xmx512m -XX:PermSize=256m</args>
+                        <removeDefaultWebapps>false</removeDefaultWebapps>
+                        <config>tomee/conf</config>
+                        <libs>
+                            <lib>mysql:mysql-connector-java:${mysql.version}</lib>
+                        </libs>
+                    </configuration>
+                </plugin>
+
+            </plugins>
+        </pluginManagement>
+
+        <plugins>
+
+            <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-antrun-plugin</artifactId>
+                <version>3.0.0</version>
+                <executions>
+                    <execution>
+                        <id>build docker image</id>
+                        <phase>package</phase>
+                        <configuration>
+                            <target>
+                                <chmod file="${basedir}/infrastructure/build.sh" perm="a+x"/>
+                                <exec dir="${basedir}/infrastructure/" executable="${basedir}/infrastructure/build.sh"/>
+                                <!--
+                                  Place any Ant task here. You can add anything
+                                  you can add between <target> and </target> in a
+                                  build.xml.
+                                -->
+                            </target>
+                        </configuration>
+                        <goals>
+                            <goal>run</goal>
+                        </goals>
+                    </execution>
+                </executions>
+            </plugin>
+
+        </plugins>
+
+    </build>
+
+    <dependencies>
+        <!-- https://mvnrepository.com/artifact/javax/javaee-api -->
+        <!--        <dependency>
+                    <groupId>javax</groupId>
+                    <artifactId>javaee-api</artifactId>
+                    <version>8.0</version>
+                    <scope>provided</scope>
+                </dependency>-->
+        <dependency>
+            <groupId>mysql</groupId>
+            <artifactId>mysql-connector-java</artifactId>
+            <version>${mysql.version}</version>
+        </dependency>
+
+        <dependency>
+            <groupId>jakarta.platform</groupId>
+            <artifactId>jakarta.jakartaee-api</artifactId>
+            <version>8.0.0</version>
+            <scope>provided</scope>
+        </dependency>
+
+    </dependencies>
+
+    <properties>
+        <src.dir>src</src.dir>
+        <!--        https://stackoverflow.com/a/51692749/9586230 -->
+        <java.version>8</java.version>
+        <!--        <maven.compiler.source>1.8</maven.compiler.source>-->
+        <!--        <maven.compiler.target>1.8</maven.compiler.target>-->
+        <failOnMissingWebXml>false</failOnMissingWebXml>
+        <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
+        <project.reporting.outputEncoding>UTF-8</project.reporting.outputEncoding>
+        <tomee.version>8.0.5</tomee.version>
+        <tomee.flavour>plume</tomee.flavour>
+        <mysql.version>8.0.21</mysql.version>
+    </properties>
+
+</project>
